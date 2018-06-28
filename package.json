@@ -1,5 +1,5 @@
 {
-  "name": "aq-miniapp-base-threejs",
+  "name": "aq-miniapp-lucky-bubble",
   "version": "0.1.0",
   "description": "",
   "main": "src/index.js",
@@ -16,7 +16,7 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "aq-miniapp-core": "https://s3-ap-southeast-1.amazonaws.com/funminiapps/sdk/aq-miniapp-core-v0.0.14.tgz",
+    "aq-miniapp-core": "https://s3-ap-southeast-1.amazonaws.com/funminiapps/sdk/aq-miniapp-core-v0.0.15.tgz",
     "three": "^0.91.0"
   },
   "devDependencies": {

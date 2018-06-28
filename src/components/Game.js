@@ -36,6 +36,7 @@ export default class Game<T> {
 
   onReset(data: T) {
     console.log(`onReset: ${JSON.stringify(data)}`);
+    this.gameDidReset(data);
   }
 
   gameDidMount() {
@@ -46,7 +47,11 @@ export default class Game<T> {
 
   }
 
-
+  gameDidReset(newProps: T) {
+    // This event fires when the host app
+    // requests a game reset
+    // Subclasses need to override this
+  }
 
   animate() {
     requestAnimationFrame(this.animate.bind(this));

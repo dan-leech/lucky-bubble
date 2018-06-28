@@ -140,6 +140,16 @@ aproba@^1.0.3, aproba@^1.1.1:
     text-encoding-utf-8 "^1.0.1"
     uuid "^3.1.0"
 
+"aq-miniapp-core@https://s3-ap-southeast-1.amazonaws.com/funminiapps/sdk/aq-miniapp-core-v0.0.15.tgz":
+  version "0.0.15"
+  resolved "https://s3-ap-southeast-1.amazonaws.com/funminiapps/sdk/aq-miniapp-core-v0.0.15.tgz#4b144a8942e3a1dcf68d73832408e6a54b7553a2"
+  dependencies:
+    base64-js "^1.2.1"
+    hawk "^6.0.2"
+    text-encoding-utf-8 "^1.0.1"
+    uuid "^3.1.0"
+    whatwg-fetch "^2.0.3"
+
 are-we-there-yet@~1.1.2:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/are-we-there-yet/-/are-we-there-yet-1.1.4.tgz#bb5dca382bb94f05e15194373d16fd3ba1ca110d"
@@ -5447,6 +5457,10 @@ text-table@0.2.0, text-table@~0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
 
+three@^0.91.0:
+  version "0.91.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.91.0.tgz#033fe745b64e56e679a86581957cfd1c5f9fe284"
+
 through2@^2.0.0:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/through2/-/through2-2.0.3.tgz#0004569b37c7c74ba39c43f3ced78d1ad94140be"
@@ -5842,6 +5856,10 @@ websocket-extensions@>=0.1.1:
 whatwg-fetch@>=0.10.0:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.3.tgz#9c84ec2dcf68187ff00bc64e1274b442176e1c84"
+
+whatwg-fetch@^2.0.3:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/whatwg-fetch/-/whatwg-fetch-2.0.4.tgz#dde6a5df315f9d39991aa17621853d720b85566f"
 
 whet.extend@~0.9.9:
   version "0.9.9"

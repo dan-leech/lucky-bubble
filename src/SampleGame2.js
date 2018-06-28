@@ -141,9 +141,9 @@ export default class SampleGame extends Game<Props> {
     // will be called
     this.playTexture = new THREE.TextureLoader(this.loadingManager).load(Assets.textures.playBtn);
     this.alphaTexture = new THREE.TextureLoader(this.loadingManager).load(Assets.textures.whitePixel);
-    this.burstTexture = new THREE.TextureLoader(this.loadingManager).load(this.props.addtionalInfo.bubblePopped);
+    this.burstTexture = new THREE.TextureLoader(this.loadingManager).load(this.props.engagementInfo.bubblePopped);
 
-    this.cubeTexture = new THREE.CubeTextureLoader(this.loadingManager).load(this.props.addtionalInfo.cubeBackground);
+    this.cubeTexture = new THREE.CubeTextureLoader(this.loadingManager).load(this.props.engagementInfo.cubeBackground);
   }
 
   assetsDidLoad() {
@@ -212,15 +212,15 @@ export default class SampleGame extends Game<Props> {
   _loadOtherAssets() {
     let scope = this;
 
-    this.bubbleTexture = new THREE.TextureLoader().load(this.props.addtionalInfo.bubbleImage);
+    this.bubbleTexture = new THREE.TextureLoader().load(this.props.engagementInfo.bubbleImage);
 
     this.emoticonsTextures = [];
-    this.props.addtionalInfo.emoticons.forEach(function (item) {
+    this.props.engagementInfo.emoticons.forEach(function (item) {
       scope.emoticonsTextures.push(new THREE.TextureLoader().load(item));
     });
 
     this.coins = [];
-    this.props.addtionalInfo.coins.forEach(function (item) {
+    this.props.engagementInfo.coins.forEach(function (item) {
       scope.coins.push({texture: new THREE.TextureLoader().load(item.icon), value: item.value});
     });
   }

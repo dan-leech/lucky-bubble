@@ -10,7 +10,7 @@ import nz from  "./images/nz.png";
 import popAnimation from  "./images/BiggerSheet.png";
 
 
- const GAME_WIDTH = window.innerWidth;
+const GAME_WIDTH = window.innerWidth;
 const GAME_HEIGHT = window.innerHeight;
 const DEVT = true;
 
@@ -24,7 +24,7 @@ const DEVT = true;
 let data = {
   shouldWin: true,
   winImage: 'https://s3.amazonaws.com/bengga-web-funtypes/gift.png',
-  addtionalInfo: {
+  engagementInfo: {
     bubbleImage: "https://threejs.org/examples/textures/decal/decal-diffuse.png",
     bubbleFull: "http://example.com/example1.jpg",
     bubblePopped: "https://threejs.org/examples/textures/decal/decal-diffuse.png",
@@ -56,6 +56,8 @@ let data = {
     popAnimation: popAnimation
   }
 }
+
+// console.log(JSON.stringify(data));
 
 const miniApp = new MiniApp({
   width: GAME_WIDTH,

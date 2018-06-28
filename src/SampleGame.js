@@ -1,8 +1,12 @@
 // @flow
+import {
+  defaultLifeCycle
+} from 'aq-miniapp-core';
 import Game from './components/Game';
 import Assets, {ASSETS} from './assets';
 import TextureAnimator from './utils/TextureAnimator2';
 import DeviceOrientationControls from './utils/DeviceOrientationControls';
+
 
 // Three.js NodeLibrary
 import './utils/nodes/GLNode';
@@ -137,7 +141,7 @@ var runnerTexture  = null;
 
 export default class SampleGame extends Game<Props> {
 
-  sceneCube: THREE.Scene;
+sceneCube: THREE.Scene;
 geometry: THREE.Geometry;
 alphaTexture: THREE.Texture;
 cubeTexture: THREE.Texture;
@@ -161,14 +165,14 @@ gameDidMount() {
   // will be called
   this.playTexture = new THREE.TextureLoader(this.loadingManager).load(Assets.textures.playBtn);
   this.alphaTexture = new THREE.TextureLoader(this.loadingManager).load(Assets.textures.whitePixel);
-  this.burstTexture = new THREE.TextureLoader(this.loadingManager).load(this.props.addtionalInfo.bubblePopped);
+  this.burstTexture = new THREE.TextureLoader(this.loadingManager).load(this.props.engagementInfo.bubblePopped);
 
-  this.cubeTexture = new THREE.CubeTextureLoader(this.loadingManager).load(this.props.addtionalInfo.cubeBackground);
+  this.cubeTexture = new THREE.CubeTextureLoader(this.loadingManager).load(this.props.engagementInfo.cubeBackground);
 
 }
 
 assetsDidLoad() {
-  runnerTexture  = new THREE.ImageUtils.loadTexture(this.props.addtionalInfo.popAnimation )
+  runnerTexture  = new THREE.ImageUtils.loadTexture(this.props.engagementInfo.popAnimation )
   this._initGraphics();
   this._initInput();
   this._initGui();
@@ -176,6 +180,15 @@ assetsDidLoad() {
   this.animate();
 
   this._loadOtherAssets();
+
+  defaultLifeCycle.informReady();
+}
+
+gameDidReset(newProps: Props) {
+  // This event fires when the host app
+  // requests a game reset
+  // Subclasses need to override this
+  this._initGui();
 }
 
 _initGraphics() {
@@ -235,15 +248,15 @@ _initGui() {
 _loadOtherAssets() {
   let scope = this;
 
-  this.bubbleTexture = new THREE.TextureLoader().load(this.props.addtionalInfo.bubbleImage);
+  this.bubbleTexture = new THREE.TextureLoader().load(this.props.engagementInfo.bubbleImage);
 
   this.emoticonsTextures = [];
-  this.props.addtionalInfo.emoticons.forEach(function (item) {
+  this.props.engagementInfo.emoticons.forEach(function (item) {
     scope.emoticonsTextures.push(new THREE.TextureLoader().load(item));
   });
 
   this.coins = [];
-  this.props.addtionalInfo.coins.forEach(function (item) {
+  this.props.engagementInfo.coins.forEach(function (item) {
     scope.coins.push({texture: new THREE.TextureLoader().load(item.icon), value: item.value});
   });
 }
@@ -460,7 +473,7 @@ _guiGameStages() {
     scope._hideBubbles();
   }, 200);
 
-  setTimeout(function () {
+  setTimeout((function () {
     guiInstructions.style.display = 'none';
     guiTries.style.display = 'none';
     guiWin.style.display = 'none';
@@ -479,8 +492,20 @@ _guiGameStages() {
       guiWin.style.display = 'block';
       guiWinAmount.innerText = gameWinTotal + 'BM';
       // END of the GAME
+
+      defaultLifeCycle.setResult({
+        winCriteriaPassed: gameWinTotal > 0,
+        score: {
+          value: gameWinTotal
+        },
+        resultImageUrl: this.props.engagementInfo.background
+      });
+
+      setTimeout(() => {
+        defaultLifeCycle.end();
+      }, 2000);
     }
-  }, 1000);
+  }).bind(this), 1000);
 }
 
 gameWillUnmount() {

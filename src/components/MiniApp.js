@@ -62,7 +62,6 @@ export default class MiniApp {
     this.game = new this.props.game(this.renderer, data);
 
     this.game.gameDidMount();
-    defaultLifeCycle.informReady();
   }
 
 }
