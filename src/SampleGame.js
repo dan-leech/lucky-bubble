@@ -683,7 +683,7 @@ render() {
 }
 
 _controlCamera() {
-  inputBeta = Math.ceil(THREE.Math.clamp(this.deviceControls.beta, -inputMaxTiltedAngle, inputMaxTiltedAngle) * inputScale);
+  inputBeta = Math.ceil(THREE.Math.clamp(this.deviceControls.beta - 45 * Math.PI / 180, -inputMaxTiltedAngle, inputMaxTiltedAngle) * inputScale);
   inputGamma = Math.ceil((THREE.Math.clamp(this.deviceControls.gamma, -inputMaxTiltedAngle, inputMaxTiltedAngle)) * inputScale);
 
   this.camera.position.x += (inputGamma - this.camera.position.x) * inputCameraSpeed;
