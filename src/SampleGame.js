@@ -97,10 +97,10 @@ const startBubbleBurstSpeed = 5;
 let bubbles = [];
 let isGameRunning = false;
 let isGameStartScreen = false;
-const gameWinProbability = 1 / 3;
-const gameTries = 3;
-let gameTriesLeft = gameTries;
+let gameTriesLeft = 0;
 let gameWinTotal = 0;
+let gameTimer = null;
+const gameTime = 10; // seconds
 
 let boomer = null;
 var runner = null, runnerMaterial = null;
@@ -121,14 +121,10 @@ else {
 }
 // gui
 const guiStartBubblePosition = new THREE.Vector3(0, -100, -600);
-const guiStartBubblePlayPosition = new THREE.Vector3(0, -70, -400);
 const guiTopContainer = document.getElementById('top-container');
 const guiCenterContainer = document.getElementById('center-container');
-const guiInstructions = document.getElementById('instructions');
 const guiWin = document.getElementById('win');
-const guiTries = document.getElementById('tries');
-const guiTargetAmount = document.getElementById('target-amount');
-const guiWinAmount = document.getElementById('win-amount');
+const guiGameOver = document.getElementById('game-over');
 
 // input for smooth
 const inputMaxTiltedAngle = Math.PI / 3;
@@ -200,6 +196,9 @@ _initGraphics() {
 
   this.cameraCube = new THREE.PerspectiveCamera(60, size.width / size.height, 1, 100000);
 
+  this.camera.lookAt(this.scene.position);
+  this.cameraCube.rotation.copy(this.camera.rotation);
+
   this.sceneCube = new THREE.Scene();
   this.geometry = new THREE.SphereGeometry(100, 32, 16);
 
@@ -215,6 +214,7 @@ _initGraphics() {
     side: THREE.BackSide,
   });
   let mesh = new THREE.Mesh(new THREE.CubeGeometry(100, 100, 100), material);
+
   this.sceneCube.add(mesh);
 }
 
@@ -238,9 +238,8 @@ _initGui() {
   guiTopContainer.style.display = 'flex';
 
   guiCenterContainer.style.display = 'none';
-  guiInstructions.style.display = 'none';
-  guiTries.style.display = 'none';
   guiWin.style.display = 'none';
+  guiGameOver.style.display = 'none';
 
   this._createStartButton();
 }
@@ -261,8 +260,7 @@ _loadOtherAssets() {
   });
 }
 
-ExplodeAnimation(position) {
-
+ExplodeAnimation(position, startScreen) {
   if(mobileBrowser) {
     if(gameTriesLeft === 3)
       boomer = new this.TextureAnimator(runnerTexture, 19, 1, 19, 22); // texture, #horiz, #vert, #total, duration.
@@ -277,20 +275,29 @@ ExplodeAnimation(position) {
       boomer = new this.TextureAnimator(runnerTexture, 19, 1, 19, 4); // texture, #horiz, #vert, #total, duration.
   }
   runnerMaterial = new THREE.MeshBasicMaterial( { map: runnerTexture, transparent:true  } );
-  var runnerGeometry = new THREE.PlaneGeometry(850, 850, 1, 1);
+  var runnerGeometry = null
+  if (startScreen) {
+    runnerGeometry = new THREE.PlaneGeometry(250, 250, 1, 1);
+  } else {
+    runnerGeometry = new THREE.PlaneGeometry(850, 850, 1, 1);
+  }
   runner = new THREE.Mesh(runnerGeometry, runnerMaterial);
   runner.position.copy(position);
-  this.scene.add(runner);
-  runner.lookAt(this.camera.position);
+  if (startScreen) {
+    this.sceneCube.add(runner);
+    //runner.lookAt(this.cameraCube.position);
+  } else {
+    this.scene.add(runner);
+    runner.lookAt(this.camera.position);
+  }
 }
 
 TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration)
 {
   // note: texture passed by reference, will be updated by the update function.
-
   var textureCounter = 0;
   this.tilesHorizontal = tilesHoriz;
-  this.tilesVertical = tilesVert;111
+  this.tilesVertical = tilesVert;
   // how many images does this spritesheet contain?
   //  usually equals tilesHoriz * tilesVert, but not necessarily,
   //  if there at blank tiles at the bottom of the spritesheet.
@@ -366,33 +373,39 @@ _onTouchBubble(scope, event) {
   );
 
   let intersections;
+  var me = this;
 
   if (isGameRunning) {
     raycaster.setFromCamera(mouseCoords, scope.camera);
     intersections = raycaster.intersectObjects(bubbles);
 
     if (intersections.length > 0) {
-      isGameRunning = false;
       let intersected = intersections[0].object;
       intersected._isPoping = true;
-      let spriteMap;
-      if (Math.random() <= gameWinProbability) {
-        let coin = scope.coins[Math.ceil(Math.random() * scope.coins.length - 1)];
-        spriteMap = coin.texture;
-        gameWinTotal += coin.value;
-      } else
-        spriteMap = scope.emoticonsTextures[Math.ceil(Math.random() * scope.emoticonsTextures.length - 1)];
+      // let spriteMap;
+      // if (Math.random() <= gameWinProbability) {
+      //   let coin = scope.coins[Math.ceil(Math.random() * scope.coins.length - 1)];
+      //   spriteMap = coin.texture;
+      //   gameWinTotal += coin.value;
+      // } else
+      //   spriteMap = scope.emoticonsTextures[Math.ceil(Math.random() * scope.emoticonsTextures.length - 1)];
 
-      let spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffffff});
-      scope.billboard = new THREE.Sprite(spriteMaterial);
-      scope.billboard.position.copy(intersected.position);
-      scope.billboard.scale.x = scope.billboard.scale.y = 750;
-      var me = this;
+      // todo: coin on win
+      // let spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffffff});
+      // scope.billboard = new THREE.Sprite(spriteMaterial);
+      // scope.billboard.position.copy(intersected.position);
+      // scope.billboard.scale.x = scope.billboard.scale.y = 750;
+
+      gameTriesLeft--;
+      function checkGameOver() {
+        if (!gameTriesLeft) {
+          scope._guiGameOver()
+        }
+      }
 
       intersected._animator
           .onComplete(function (animator, texture) {
             intersected._isPoped = true;
-            scope._guiGameStages();
 
             var self = me;
             self.ExplodeAnimation(intersected.position);
@@ -403,6 +416,7 @@ _onTouchBubble(scope, event) {
                 boomer = null;
                 runner = null;
                 runnerMaterial = null;
+                checkGameOver();
                 scope._removeSceneObject(scope.billboard);
               }, 900);
             }
@@ -412,6 +426,7 @@ _onTouchBubble(scope, event) {
                 boomer = null;
                 runner = null;
                 runnerMaterial = null;
+                checkGameOver();
                 scope._removeSceneObject(scope.billboard);
               }, 400);
             }
@@ -430,11 +445,30 @@ _onTouchBubble(scope, event) {
       isGameStartScreen = false;
       let intersected = intersections[0].object;
       intersected._isPoping = true;
-      intersected.material.alphaMap = scope.burstTexture;
 
       intersected._animator
           .onComplete(function (animator) {
             intersected._isPoped = true;
+
+            var self = me;
+            self.ExplodeAnimation(intersected.position, true);
+
+            if(mobileBrowser) {
+              setTimeout(function () {
+                me.sceneCube.remove(runner);
+                boomer = null;
+                runner = null;
+                runnerMaterial = null;
+              }, 900);
+            }
+            else {
+              setTimeout(function () {
+                me.sceneCube.remove(runner);
+                boomer = null;
+                runner = null;
+                runnerMaterial = null;
+              }, 400);
+            }
           })
           .reset()
           .start();
@@ -443,54 +477,37 @@ _onTouchBubble(scope, event) {
 }
 
 _startGame() {
-  const scope = this;
+  let scope = this;
 
-  gameTriesLeft = gameTries;
+  if (this.props.shouldWin) {
+    gameTriesLeft = Math.ceil(20 - Math.random() * 5);
+  } else {
+    gameTimer = gameTime
+  }
+
   guiTopContainer.style.display = 'none';
 
-  guiInstructions.style.display = 'block';
-  guiTargetAmount.innerText = gameTries;
-  guiCenterContainer.style.display = 'flex';
-
   setTimeout(function () {
-    guiCenterContainer.style.display = 'none';
-    scope._continueGame();
+    scope._createBubbles();
+    isGameRunning = true;
   }, 1500);
 }
 
-_continueGame() {
-  this._createBubbles();
-
-  setTimeout(function () {
-    isGameRunning = true;
-  }, 500);
-}
-
-_guiGameStages() {
+_guiGameOver() {
   const scope = this;
+  isGameRunning = false;
 
   setTimeout(function () {
     scope._hideBubbles();
   }, 200);
 
   setTimeout((function () {
-    guiInstructions.style.display = 'none';
-    guiTries.style.display = 'none';
     guiWin.style.display = 'none';
+    guiGameOver.style.display = 'none';
     guiCenterContainer.style.display = 'flex';
 
-    if (gameTriesLeft > 0) {
-      guiTries.style.display = 'block';
-      guiTries.innerText = gameTriesLeft + (gameTriesLeft > 1 ? ' more tries' : ' more try');
-      gameTriesLeft--;
-      // start next try
-      setTimeout(function () {
-        guiCenterContainer.style.display = 'none';
-        scope._continueGame();
-      }, 2500);
-    } else {
+    if (scope.props.shouldWin) {
       guiWin.style.display = 'block';
-      guiWinAmount.innerText = gameWinTotal + 'BM';
       // END of the GAME
 
       defaultLifeCycle.setResult({
@@ -500,6 +517,12 @@ _guiGameStages() {
         },
         resultImageUrl: this.props.engagementInfo.background
       });
+
+      setTimeout(() => {
+        defaultLifeCycle.end();
+      }, 2000);
+    } else {
+      guiGameOver.style.display = 'block';
 
       setTimeout(() => {
         defaultLifeCycle.end();
@@ -573,8 +596,8 @@ _createStartButton() {
           THREE.Math3Node.MIX
       );
 
-  let animator = new THREE.TextureAnimator(this.burstTexture, 5, 2, 0.2);
-  mtl.alpha = animator.alphaNode;
+  let animator = new THREE.TextureAnimator(this.burstTexture, burstSpeed, 2, 0.2, false);
+  //mtl.alpha = animator.alphaNode;
 
   // build shader
   mtl.build();
@@ -582,10 +605,10 @@ _createStartButton() {
   this.startBubble = new THREE.Mesh(this.geometry, mtl);
   this.sceneCube.add(this.startBubble);
 
-  let spriteMap = this.playTexture;
-  let spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffffff});
-  this.startBubblePlay = new THREE.Sprite(spriteMaterial);
-  this.startBubblePlay.scale.x = this.startBubblePlay.scale.y = 60;
+  // let spriteMap = this.playTexture;
+  // let spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffffff});
+  // this.startBubblePlay = new THREE.Sprite(spriteMaterial);
+  // this.startBubblePlay.scale.x = this.startBubblePlay.scale.y = 60;
   //this.sceneCube.add(this.startBubblePlay);
 
   this.startBubble._animator = animator;
@@ -595,7 +618,6 @@ _createStartButton() {
 
 _createBubbles() {
   bubbles = [];
-
 
   var mtl = new THREE.MeshBasicMaterial( { color: 0x09D539, envMap: this.cubeTexture, opacity:0.9, wireframe:false, transparent:true } );
 
@@ -630,6 +652,7 @@ _removeBubbles() {
 }
 
 _removeSceneObject(object) {
+  if (!object) return
   this.scene.remove(object);
   this._disposeObjectMaterials(object)
 }
@@ -646,6 +669,10 @@ _disposeObjectMaterials(object) {
 render() {
   let delta = clock.getDelta();
 
+  if (isGameRunning) gameTimer -= delta
+  if (!this.props.shouldWin && gameTimer < 0)
+    this._guiGameOver()
+
   this._trackBubbles(delta);
   this._controlCamera();
 
@@ -657,7 +684,7 @@ render() {
 
 _controlCamera() {
   inputBeta = Math.ceil(THREE.Math.clamp(this.deviceControls.beta, -inputMaxTiltedAngle, inputMaxTiltedAngle) * inputScale);
-  inputGamma = Math.ceil(THREE.Math.clamp(this.deviceControls.gamma, -inputMaxTiltedAngle, inputMaxTiltedAngle) * inputScale);
+  inputGamma = Math.ceil((THREE.Math.clamp(this.deviceControls.gamma, -inputMaxTiltedAngle, inputMaxTiltedAngle)) * inputScale);
 
   this.camera.position.x += (inputGamma - this.camera.position.x) * inputCameraSpeed;
   this.camera.position.y += (-inputBeta - this.camera.position.y) * inputCameraSpeed;
@@ -682,8 +709,8 @@ _trackBubbles(deltaTime) {
     if (this.startBubble._isPoped) {
       this.sceneCube.remove(this.startBubble);
       // this.sceneCube.remove(this.startBubblePlay); // already removed on click
-      this._disposeObjectMaterials(this.startBubble);
-      this._disposeObjectMaterials(this.startBubblePlay);
+      //this._disposeObjectMaterials(this.startBubble);
+      //this._disposeObjectMaterials(this.startBubblePlay);
       this.startBubble = null;
       this._startGame();
     }
