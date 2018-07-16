@@ -28,6 +28,8 @@ module.exports = function (THREE) {
     // completion callback
     this.onCompleteCallback = null;
 
+    this.completeParams = null;
+
     // running
     let isRunning = false;
 
@@ -37,7 +39,7 @@ module.exports = function (THREE) {
       return this;
     };
 
-    this.start = function (position) {
+    this.start = function (position, params) {
       isRunning = true;
 
       currentTile = 0;
@@ -46,6 +48,8 @@ module.exports = function (THREE) {
       mesh.position.copy(position);
 
       sceneSource.add(mesh);
+
+      this.completeParams = params;
 
       return this;
     };
@@ -69,7 +73,7 @@ module.exports = function (THREE) {
         sceneSource.remove(mesh);
 
         if (typeof this.onCompleteCallback === 'function')
-          this.onCompleteCallback(this);
+          this.onCompleteCallback(this, this.completeParams);
       }
     };
 
@@ -78,6 +82,8 @@ module.exports = function (THREE) {
       currentDisplayTime = 0;
 
       sceneSource.remove(mesh);
+
+      this.completeParams = null;
 
       return this;
     };

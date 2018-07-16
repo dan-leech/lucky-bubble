@@ -283,7 +283,7 @@ _onTouchBubble(scope, event) {
       }
 
       function showCoin() {
-        if(scope.props.shouldWin && gameTriesLeft === 0) {
+        if(scope.props.shouldWin) {
           let spriteMap;
           let coin = scope.coins[Math.ceil(Math.random() * scope.coins.length - 1)];
           spriteMap = coin.texture;
@@ -301,10 +301,10 @@ _onTouchBubble(scope, event) {
       }
 
       intersected._animator
-          .onComplete(function () {
+          .onComplete(function (animator, tries) {
             intersected._isPoped = true;
 
-            let billboard = showCoin()
+            let billboard = tries <= 0 ? showCoin() : null
 
             if(mobileBrowser) {
               setTimeout(function () {
@@ -320,7 +320,7 @@ _onTouchBubble(scope, event) {
             }
           })
           .reset()
-          .start(intersected.position);
+          .start(intersected.position, gameTriesLeft);
 
     }
   } else {
